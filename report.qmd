@@ -1,27 +1,138 @@
+
 ---
 title: "Marketing Campaign Analysis"
 author: "Krrish Jambhulkar"
-format: html
+format: 
+  html: default
+  pdf: default
+execute:
+  echo: false
+  warning: false
+  message: false
 editor: visual
 ---
 
-## Quarto
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
 
 ```{r}
-1 + 1
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(knitr)
+
+# Load your unique data
+marketing_data <- read_csv("data/36709859_Krrish Jambhulkar.csv")
 ```
 
-You can add options to executable code like this
+## Introduction
 
+As the Head of Marketing, I am evaluating our recent campaign to see if our spending effectively increased customer purchases. This research is motivated by the need to ensure our budget is being used wisely across our different business segments. By looking at the relationship between what we spend and what customers buy, we can identify which strategies are most profitable. This analysis will help us plan future campaigns by focusing on the most successful customer behaviors.
+
+
+
+## Research Question
+
+Did spending more on marketing lead to customers buying more? 
+We look at whether this pattern holds across different customer 
+segments to understand which group responded best to the campaign. 
+This will help us decide where to focus our marketing budget in the future.
+
+## Dataset Introduction
+
+This dataset contains information about 150 customers from a 
+marketing campaign run last quarter. For each customer, we have 
+the amount spent on marketing, how many times they visited, and 
+how much they bought. Customers are also grouped into three 
+segments Consumer, SMB, and Enterprise.
+
+Before analysing the data, some cleaning was done. Dates were 
+written in different formats so they were all converted to the 
+same format. Customers who did not make a purchase or had zero 
+visits were removed as they are not useful for our analysis. 
+The notes column was also removed as it did not have any useful 
+information.
 ```{r}
+#| label: data-cleaning
+#| include: false
+
+marketing_data <- read_csv("data/36709859_Krrish Jambhulkar.csv") %>%
+  mutate(
+    signup_date = parse_date_time(signup_date, 
+                  orders = c("ymd", "dmy", "mdy", "B d, Y")) %>% 
+                  as.Date()
+  ) |>
+  filter(!is.na(purchase_amount), purchase_amount > 0) %>%
+  filter(visits > 0) %>%
+  select(-notes)
+```
+
+### Dataset Description
+
+After cleaning, the dataset contains `r nrow(marketing_data)` observations 
+and `r ncol(marketing_data)` variables. The variables include customer ID, 
+signup date, marketing spend, visits, purchase amount, and segment, which 
+are a mix of numeric and categorical variables.
+```{r}
+#| label: tbl-segment-summary
 #| echo: false
-2 * 2
+#| tbl-cap: "Average marketing spend and purchase amount by segment"
+
+marketing_data %>%
+  group_by(segment) %>%
+  summarise(
+    Mean_Marketing_Spend = round(mean(marketing_spend), 2),
+    Mean_Purchase_Amount = round(mean(purchase_amount), 2)
+  ) %>%
+  kable()
+```
+```{r}
+#| label: fig-segment-count
+#| echo: false
+#| fig-cap: "Number of customers per segment"
+
+ggplot(marketing_data, aes(x = segment)) +
+  geom_bar(fill = "steelblue") +
+  labs(x = "Segment", y = "Number of Customers") +
+  theme_minimal()
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## Results
+
+@fig-spend-purchase shows the relationship between marketing spend 
+and purchase amount across all customers. The trend line goes upward 
+from left to right, suggesting that higher marketing spend does lead 
+to higher purchase amounts. @fig-spend-segment shows the same 
+relationship broken down by segment, where all three segments 
+Consumer, SMB and Enterprise show the same upward trend, meaning 
+higher spend led to more purchases across all customer groups.
+```{r}
+#| label: fig-spend-purchase
+#| echo: false
+#| fig-cap: "Relationship between marketing spend and purchase amount"
+
+ggplot(marketing_data, aes(x = marketing_spend, y = purchase_amount)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Marketing Spend ($)", y = "Purchase Amount ($)") +
+  theme_minimal()
+```
+```{r}
+#| label: fig-spend-segment
+#| echo: false
+#| fig-cap: "Relationship between marketing spend and purchase amount by segment"
+
+ggplot(marketing_data, aes(x = marketing_spend, y = purchase_amount, 
+                            color = segment)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Marketing Spend ($)", y = "Purchase Amount ($)", 
+       color = "Segment") +
+  theme_minimal()
+```
+
+
+
+
+
