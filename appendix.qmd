@@ -1,0 +1,31 @@
+---
+title: "appendix"
+author: "Krrish Jambhulkar"
+format:
+  html: default
+  pdf: default
+editor: visual
+---
+
+\
+\
+AI Declaration\
+\
+I used Chat GPT a generative AI tool to assist with this assignment. Specifically I used it to Correct grammar and spelling in my report writing\
+\
+Screenshots\
+\
+
+![](images/Screenshot1%20.png)
+
+![](images/Screenshot2.png)
+
+![](images/Screenshot3.png)
+
+![](images/Screenshot4.png)
+
+![](images/Screenshot5.png)
+
+\
+\
+\
